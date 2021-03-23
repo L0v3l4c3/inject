@@ -1,3 +1,30 @@
+/*********
+Usage ->
+
+ - cargo run {path_to_src} {alias} [..filterable_dirs]
+ - e.g cargo run ../myproject/src @app handlebars donottraverse public
+
+Running this script might prompt you to allow many files to be opened simultaneously -> 
+    In this case, run this beforehand : 
+
+$ echo kern.maxfiles=65536 | sudo tee -a /etc/sysctl.conf
+$ echo kern.maxfilesperproc=65536 | sudo tee -a /etc/sysctl.conf
+$ sudo sysctl -w kern.maxfiles=65536
+$ sudo sysctl -w kern.maxfilesperproc=65536
+$ ulimit -n 65536
+
+(65536 could be bumped higher although I don't recommend it, if the error still occurs, I suggest you run this program progressively over the codebase by using filter cli args)
+
+To revert (apple default values) :
+
+$ echo kern.maxfiles=12288 | sudo tee -a /etc/sysctl.conf
+$ echo kern.maxfilesperproc=10240 | sudo tee -a /etc/sysctl.conf
+$ sudo sysctl -w kern.maxfiles=12288
+$ sudo sysctl -w kern.maxfilesperproc=10240
+$ ulimit -n 12288
+
+*********/
+
 use std::{env::args, ffi::{OsStr, OsString}, path::{Path}};
 
 
@@ -22,9 +49,7 @@ fn main() {
 
     if args_length < 2 { panic!("Insufficient number of arguments provided.") }
 
-    let capacity = if args_length > 2 { args_length - 1 } else { args_length };
-
-    let mut args: Vec<String> = Vec::with_capacity(capacity);
+    let mut args: Vec<String> = Vec::with_capacity(args_length);
     args.extend(_args);
 
     let filters = &args[3..];
