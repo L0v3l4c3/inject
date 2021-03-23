@@ -52,7 +52,7 @@ fn main() {
     let mut args: Vec<String> = Vec::with_capacity(args_length);
     args.extend(_args);
 
-    let filters = &args[3..];
+    let filters = &args[2..];
 
     let root_entries = std::fs::read_dir(&args[0]).unwrap().filter_map(|d| { // storing given path root entries
         if d.is_ok() {
