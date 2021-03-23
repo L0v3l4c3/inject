@@ -1,16 +1,16 @@
-use std::{env::args, ffi::OsStr, path::{Path}};
+use std::{env::args, ffi::{OsStr, OsString}, path::{Path}};
 
 
 const ALLOWED_EXTENSIONS: [&str; 4] = ["js", "jsx", "ts", "tsx"];
 const PATTERNS: [&str; 4] = ["from \"", "from '", "import \"", "import '"];
 
-struct RootEntry<'a> {
+struct RootEntry {
     file_name: String,
-    path: &'a str
+    path: OsString
 }
 
-impl RootEntry<'_> {
-    fn new(file_name: String, path: &str) -> RootEntry {
+impl RootEntry {
+    fn new(file_name: String, path: OsString) -> RootEntry {
         RootEntry { file_name, path }
     }
 }
@@ -32,13 +32,13 @@ fn main() {
     let root_entries = std::fs::read_dir(&args[0]).unwrap().filter_map(|d| { // storing given path root entries
         if d.is_ok() {
              let dir_ok = d.ok().unwrap();
-             if !filters.contains(&dir_ok.file_name().into_string().unwrap()) { Some(RootEntry::new(dir_ok.file_name().into_string().unwrap(), dir_ok.path().to_str().unwrap()))  } 
+             if !filters.contains(&dir_ok.file_name().into_string().unwrap()) { Some(RootEntry::new(dir_ok.file_name().into_string().unwrap(), dir_ok.path().into_os_string())) } 
              else { None }
         } else { None }
     }).collect::<Vec<RootEntry>>();
 
     for root_entry in &root_entries {
-        read_dir_recursively(root_entry.path, &args[1], &root_entries);
+        read_dir_recursively(&root_entry.path, &args[1], &root_entries);
     }
  }
 
@@ -69,8 +69,8 @@ where
     for entry in root_entries {
         let mut content = std::fs::read_to_string(&path).unwrap();
         for pattern in PATTERNS.iter() {
-            let matcher = vec![pattern.to_string(), entry.file_name].join(""); 
-            let destination = vec![pattern.to_string(), alias.to_owned(), String::from("/"), entry.file_name].join(""); 
+            let matcher = format!("{pattern}{filename}", pattern = pattern.to_string(), filename = entry.file_name);
+            let destination = format!("{pattern}{alias}/{filename}", pattern = pattern.to_string(), alias = alias, filename = entry.file_name);
             content = content.replace(&matcher, &destination);
         }
        
