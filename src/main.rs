@@ -87,8 +87,8 @@ fn main() {
 #[allow(unused_must_use)]
 fn read_dir_recursively<P>(
     path: P,
-    alias: &String,
-    root_entries: &Vec<RootEntry>,
+    alias: &str,
+    root_entries: &[RootEntry],
 ) -> Result<(), std::io::Error>
 where
     P: AsRef<Path>,
@@ -116,7 +116,7 @@ where
 }
 
 #[allow(unused_must_use)]
-fn inject<P>(path: P, alias: &String, root_entries: &Vec<RootEntry>) -> ()
+fn inject<P>(path: P, alias: &str, root_entries: &[RootEntry])
 where
     P: AsRef<Path>,
 {
