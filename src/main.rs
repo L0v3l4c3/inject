@@ -47,19 +47,14 @@ impl RootEntry {
 }
 
 fn main() -> IOResult<()> {
-    let _args = args().skip(1);
-    let args_length = _args.len();
+    let args: Vec<_> = args().skip(1).collect();
 
-    if args_length < 2 {
-        panic!("Insufficient number of arguments provided.")
-    }
+    let (src_path, alias, filters) = match args.as_slice() {
+        [src_path, alias, filters @ ..] => (src_path, alias, filters),
+        _ => panic!("Insufficient number of arguments provided."),
+    };
 
-    let mut args: Vec<String> = Vec::with_capacity(args_length);
-    args.extend(_args);
-
-    let filters = &args[2..];
-
-    let root_entries = std::fs::read_dir(&args[0])?
+    let root_entries = std::fs::read_dir(src_path)?
         .filter_map(|d| {
             // storing given path root entries
             if d.is_ok() {
@@ -79,7 +74,7 @@ fn main() -> IOResult<()> {
         .collect::<Vec<RootEntry>>();
 
     for root_entry in &root_entries {
-        read_dir_recursively(&root_entry.path, &args[1], &root_entries)?;
+        read_dir_recursively(&root_entry.path, alias, &root_entries)?;
     }
 
     Ok(())
