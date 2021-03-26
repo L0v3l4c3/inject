@@ -25,18 +25,22 @@ $ ulimit -n 12288
 
 *********/
 
-use std::{env::args, ffi::OsString, io::Result as IOResult, path::Path};
+use std::{
+    env::args,
+    io::Result as IOResult,
+    path::{Path, PathBuf},
+};
 
 const ALLOWED_EXTENSIONS: [&str; 4] = ["js", "jsx", "ts", "tsx"];
 const PATTERNS: [&str; 4] = ["from \"", "from '", "import \"", "import '"];
 
 struct RootEntry {
     file_name: String,
-    path: OsString,
+    path: PathBuf,
 }
 
 impl RootEntry {
-    fn new(file_name: String, path: OsString) -> RootEntry {
+    fn new(file_name: String, path: PathBuf) -> RootEntry {
         RootEntry { file_name, path }
     }
 }
@@ -56,7 +60,7 @@ fn main() -> IOResult<()> {
                 bypass_filters.then(|| {
                     Ok(RootEntry::new(
                         entry.file_name().into_string().unwrap(),
-                        entry.path().into_os_string(),
+                        entry.path(),
                     ))
                 })
             }
