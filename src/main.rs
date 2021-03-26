@@ -50,23 +50,19 @@ fn main() -> IOResult<()> {
     };
 
     let root_entries = std::fs::read_dir(src_path)?
-        .filter_map(|d| {
-            // storing given path root entries
-            if d.is_ok() {
-                let dir_ok = d.ok().unwrap();
-                if !filters.contains(&dir_ok.file_name().into_string().unwrap()) {
-                    Some(RootEntry::new(
-                        dir_ok.file_name().into_string().unwrap(),
-                        dir_ok.path().into_os_string(),
+        .filter_map(|entry_res| match entry_res {
+            Ok(entry) => {
+                let bypass_filters = !filters.contains(&entry.file_name().into_string().unwrap());
+                bypass_filters.then(|| {
+                    Ok(RootEntry::new(
+                        entry.file_name().into_string().unwrap(),
+                        entry.path().into_os_string(),
                     ))
-                } else {
-                    None
-                }
-            } else {
-                None
+                })
             }
+            Err(e) => Some(Err(e)),
         })
-        .collect::<Vec<RootEntry>>();
+        .collect::<IOResult<Vec<_>>>()?;
 
     for root_entry in &root_entries {
         read_dir_recursively(&root_entry.path, alias, &root_entries)?;
