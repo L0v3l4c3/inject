@@ -59,8 +59,7 @@ fn main() -> IOResult<()> {
 
     let filters = &args[2..];
 
-    let root_entries = std::fs::read_dir(&args[0])
-        .unwrap()
+    let root_entries = std::fs::read_dir(&args[0])?
         .filter_map(|d| {
             // storing given path root entries
             if d.is_ok() {
@@ -117,7 +116,7 @@ where
     P: AsRef<Path>,
 {
     for entry in root_entries {
-        let mut content = std::fs::read_to_string(&path).unwrap();
+        let mut content = std::fs::read_to_string(&path)?;
         for pattern in PATTERNS.iter() {
             let matcher = format!(
                 "{pattern}{filename}",
