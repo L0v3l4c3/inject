@@ -31,8 +31,8 @@ use std::{
     path::{Path, PathBuf},
 };
 
-const ALLOWED_EXTENSIONS: [&str; 4] = ["js", "jsx", "ts", "tsx"];
-const PATTERNS: [&str; 4] = ["from \"", "from '", "import \"", "import '"];
+static ALLOWED_EXTENSIONS: [&str; 4] = ["js", "jsx", "ts", "tsx"];
+static PATTERNS: [&str; 4] = ["from \"", "from '", "import \"", "import '"];
 
 struct RootEntry {
     file_name: String,
@@ -65,7 +65,7 @@ fn main() -> IOResult<()> {
         .collect::<IOResult<Vec<_>>>()?;
 
     for root_entry in &root_entries {
-        read_dir_recursively(&root_entry.path, alias, &root_entries)?;
+        let _ = read_dir_recursively(&root_entry.path, alias, &root_entries);
     }
 
     Ok(())
