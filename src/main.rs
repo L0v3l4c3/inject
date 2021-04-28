@@ -27,6 +27,7 @@ $ ulimit -n 12288
 
 use std::{
     env::args,
+    fs::{read_dir, read_to_string, write},
     io::Result as IOResult,
     path::{Path, PathBuf},
 };
@@ -53,7 +54,7 @@ fn main() -> IOResult<()> {
         _ => panic!("Insufficient number of arguments provided."),
     };
 
-    let root_entries = std::fs::read_dir(src_path)?
+    let root_entries = read_dir(src_path)?
         .filter_map(|entry_res| match entry_res {
             Ok(entry) => {
                 let file_name = entry.file_name().into_string().ok()?;
@@ -75,7 +76,7 @@ fn read_dir_recursively<P>(path: P, alias: &str, root_entries: &[RootEntry]) -> 
 where
     P: AsRef<Path>,
 {
-    let directories = std::fs::read_dir(path)?;
+    let directories = read_dir(path)?;
 
     for dir_entry_res in directories {
         let dir_entry = dir_entry_res?;
@@ -103,7 +104,7 @@ fn inject<P>(path: P, alias: &str, root_entries: &[RootEntry]) -> IOResult<()>
 where
     P: AsRef<Path>,
 {
-    let mut content = std::fs::read_to_string(&path)?;
+    let mut content = read_to_string(&path)?;
 
     for entry in root_entries {
         for pattern in PATTERNS.iter() {
@@ -122,5 +123,5 @@ where
         }
     }
 
-    std::fs::write(&path, content)
+    write(&path, content)
 }
